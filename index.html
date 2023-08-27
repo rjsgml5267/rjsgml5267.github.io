@@ -19,7 +19,7 @@
     <div class="container_fluid container_body">
         <div id="#file_body">
             <div class="file_item_wrap">
-                <div class="file_item_wrap_inner">
+                <div id="career" class="file_item_wrap_inner" panel-title="경력 사항">
                     <div class="file_item file_item_folder">
                         <img class="file_item_image_folder">
                         <span class="file_item_text">경력</span>
@@ -28,7 +28,7 @@
             </div>
 
             <div class="file_item_wrap">
-                <div class="file_item_wrap_inner" src="./certificate.html">
+                <div id="certificant" class="file_item_wrap_inner" src="./certificate.html" panel-title="자격증">
                     <div class="file_item file_item_folder">
                         <img class="file_item_image_document_folder">
                         <span class="file_item_text">자격증</span>
@@ -37,7 +37,7 @@
             </div>
 
             <div class="file_item_wrap">
-                <div class="file_item_wrap_inner">
+                <div id="resume" class="file_item_wrap_inner" src="./resume.html" panel-width="1000px" panel-height="80%" panel-title="이력서";>
                     <div class="file_item file_item_resume">
                         <img class="file_item_image_resume">
                         <span class="file_item_text">이력서</span>
@@ -54,14 +54,12 @@
 (function() {
     $( document ).ready(function() {
         fn_events();
-
-
         
     });
 
     function fn_events() {
         // item click event : give focused class
-        $('.file_item_wrap_inner').on('click', function(e) {
+        $(document).on('click', '.file_item_wrap_inner', function(e) {
             $('.file_item_wrap_inner').removeClass('focused');
             $(this).addClass('focused');
             e.stopPropagation();
@@ -69,8 +67,11 @@
 
         $('.file_item_wrap_inner').on('dblclick', function(e) {
             $('.file_item_wrap_inner').removeClass('focused');
-            fn_createPanel($(this).attr("src"));
-            debugger;
+            var width = ($(this).attr('panel-width') !== undefined ) ?  $(this).attr('panel-width') : (window.innerWidth * 0.3);
+            var height = ($(this).attr('panel-height') !== undefined ) ?  $(this).attr('panel-height') : '30vh';
+            var title =  ($(this).attr('panel-title') !== undefined ) ?  $(this).attr('panel-title') : '-';
+            var id =  $(this).attr('id');
+            fn_createPanel(id, $(this).attr("src"), width, height, title);
         });
 
         $('body').on('click', function(e) {
@@ -78,16 +79,28 @@
         });
     };
 
-    function fn_createPanel(src) {
+    function fn_createPanel(id, src,width, height, title) {
+        if(!src) {
+            return;
+        }
+        var $panelObject = $('#'+id + '_panel');
+        if($panelObject.length > 0) {
+            $panelObject.css('z-index', Number($panelObject.css('z-index') + 2));
+            return;
+        }
+
         jsPanel.create({
             contentAjax: {
             url: src,
             done: function (xhr, panel) {
                 panel.contentRemove();
                 panel.content.append(jsPanel.strToHtml(xhr.responseText));
-            }
+                }
             },
-            position: 'center 50 50'
+            id : id + '_panel',
+            position : {my:'center', at:'center'},
+            contentSize: width + ' ' + height,
+            headerTitle: title
         });
     }
 }());
